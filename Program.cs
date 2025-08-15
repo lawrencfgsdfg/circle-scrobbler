@@ -11,7 +11,7 @@ using OsuMemoryDataProvider.OsuMemoryModels;
 using static BeatmapUtils;
 
 class Program {
-    static readonly String VERSION = "1.0.3";
+    static readonly String VERSION = "1.0.3b";
 
     public static Config config;
     static BeatmapMetadata beatmapMetadata = new BeatmapMetadata();
@@ -88,7 +88,9 @@ class Program {
                     if (status == (int)OsuMemoryStatus.Playing) {
                         // update beatmap metadata
                         try { // i .. don't even know anymore, i had a crash here and i don't know what it was. try catch
-                            beatmapMetadata = BeatmapUtils.ReadMetadata(osuDirectory + "/Songs/" + folderName + "/" + fileName);
+                            String path = osuDirectory + "/Songs/" + folderName + "/" + fileName;
+                            path = path.Replace("\0", "");
+                            beatmapMetadata = BeatmapUtils.ReadMetadata(path);
                         } catch(Exception e) {
                             WriteLineColor($"error reading metadata from {osuDirectory}/Songs/{folderName}/{fileName}: {e.Message}", ConsoleColor.Red);
                         }
@@ -105,7 +107,13 @@ class Program {
                 // filename changed, it's easier to listen to this instead of constantly decoding metadata from the current .osu
                 if (fileName != previousFileName) {
                     //Console.WriteLine($"AQUI {folderName} , {fileName}");
-                    beatmapMetadata = BeatmapUtils.ReadMetadata(osuDirectory + "/Songs/" + folderName + "/" + fileName);
+                    try {
+                        String path = osuDirectory + "/Songs/" + folderName + "/" + fileName;
+                        path = path.Replace("\0", "");
+                        beatmapMetadata = BeatmapUtils.ReadMetadata(path);
+                    } catch (Exception e) {
+                        WriteLineColor($"error reading metadata from {osuDirectory}/Songs/{folderName}/{fileName}: {e.Message}", ConsoleColor.Red);
+                    }
                     if (config.updateNowPlaying) lastfm.Track.UpdateNowPlayingAsync(makeScrobble());
                 }
 
