@@ -20,11 +20,16 @@ public static class BeatmapUtils
                         .Cast<Match>()
                         .ToDictionary(m => m.Groups[1].Value, m => m.Groups[2].Value.Trim());
 
-        // hopefully doesn't break ... it shouldn't, probably ...
-        metadata.Title = dict.GetValueOrDefault("Title");
-        metadata.TitleUnicode = dict.GetValueOrDefault("TitleUnicode");
-        metadata.Artist = dict.GetValueOrDefault("Artist");
-        metadata.ArtistUnicode = dict.GetValueOrDefault("ArtistUnicode");
+        // maybe overkill
+        try {
+            metadata.Title = dict.GetValueOrDefault("Title");
+            metadata.TitleUnicode = dict.GetValueOrDefault("TitleUnicode");
+            metadata.Artist = dict.GetValueOrDefault("Artist");
+            metadata.ArtistUnicode = dict.GetValueOrDefault("ArtistUnicode");
+        } catch(Exception ex) {
+            // part of me is dying not using the proper error printing but fuck it we ball
+            Program.WriteLineColor($"error reading metadata from {filePath}: {ex.Message}", ConsoleColor.Red);
+        }
 
         return metadata;
     }

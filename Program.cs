@@ -11,7 +11,7 @@ using OsuMemoryDataProvider.OsuMemoryModels;
 using static BeatmapUtils;
 
 class Program {
-    static readonly String VERSION = "1.0.1";
+    static readonly String VERSION = "1.0.2";
 
     public static Config config;
     static BeatmapMetadata beatmapMetadata = new BeatmapMetadata();
@@ -98,7 +98,7 @@ class Program {
                                 ;
                 }
 
-                // filename changed, it's easier to listen to this instead of constantly decoding metadata from the osz
+                // filename changed, it's easier to listen to this instead of constantly decoding metadata from the current .osu
                 if (fileName != previousFileName) {
                     //Console.WriteLine($"AQUI {folderName} , {fileName}");
                     beatmapMetadata = BeatmapUtils.ReadMetadata(osuDirectory + "/Songs/" + folderName + "/" + fileName);
@@ -123,10 +123,20 @@ class Program {
         }
     }
     static Scrobble makeScrobble() {
-        return new Scrobble( // big ahh lines
-            Regex.Replace((config.preferUnicodeArtist ? beatmapMetadata.ArtistUnicode : beatmapMetadata.Artist), config.artistRegex, ""),
+        return new Scrobble( // big ahh object
+            Regex.Replace((
+                config.preferUnicodeArtist
+                    ? beatmapMetadata.ArtistUnicode ?? beatmapMetadata.Artist ?? ""
+                    : beatmapMetadata.Artist ?? beatmapMetadata.ArtistUnicode ?? ""
+                    ), config.artistRegex
+            , ""),
             null, // album data
-            Regex.Replace((config.preferUnicodeTitle ? beatmapMetadata.TitleUnicode : beatmapMetadata.Title), config.titleRegex, ""),
+            Regex.Replace((
+                config.preferUnicodeTitle
+                    ? beatmapMetadata.TitleUnicode ?? beatmapMetadata.Title ?? "" // idk why VS complained about null here, but not the same for the artists
+                    : beatmapMetadata.Title ?? beatmapMetadata.ArtistUnicode ?? ""
+                    ), config.titleRegex
+            , ""),
             startTime
         );
     }
