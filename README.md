@@ -5,6 +5,9 @@ A last.fm scrobbler for the famous circle clicking game, osu!
 
 I decided to write this because although [this scrobbler](https://github.com/iMyon/OsuLastfmScrobbler) by [iMyon](https://github.com/iMyon) has served me well for many scrobbles, it's become inconsistent in whether it works or not.
 
+<img width="1204" height="400" alt="image" src="https://github.com/user-attachments/assets/aa07ea9a-1f09-4cc7-af6f-b607cab52c68" />
+
+
 ## Main Features
 - No plaintext passwords: OAuth is used to scrobble on your behalf.
 - Very simple, but configurable: Does what it says, but has some nifty options (see config section).
