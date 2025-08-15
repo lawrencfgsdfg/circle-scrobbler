@@ -11,11 +11,15 @@ using OsuMemoryDataProvider.OsuMemoryModels;
 using static BeatmapUtils;
 
 class Program {
+    static readonly String VERSION = "1.0.1";
+
     public static Config config;
     static BeatmapMetadata beatmapMetadata = new BeatmapMetadata();
     static DateTime startTime = DateTime.MinValue;
 
     static void Main(string[] args) {
+        Console.WriteLine($"circle scrobbler v{VERSION}");
+
         // lil nasty one liner to grab osu directory
         String osuDirectory = "";
         try {
@@ -32,7 +36,8 @@ class Program {
         }
 
         int previousStatus = -1000;
-        string previousMapString = "";
+        int previousRetries = -69;
+        string previousFileName = "";
         bool scrobble = false;
         
         LastfmClient lastfm = Scrobbler.createScrobbler().Result;
@@ -58,15 +63,18 @@ class Program {
             var canRead = reader.CanRead;
             if (canRead) {
                 reader.TryRead(baseAddresses.GeneralData);
-                reader.TryRead(baseAddresses.Beatmap);
-
                 int status = baseAddresses.GeneralData.RawStatus;
+                int retries = baseAddresses.GeneralData.Retries;
                 int audioTime = baseAddresses.GeneralData.AudioTime;
                 double totalAudioTime = baseAddresses.GeneralData.TotalAudioTime;
-                string mapString = baseAddresses.Beatmap.MapString;
 
-                // status has changed (executes on first run)
-                if (previousStatus != status) {
+                reader.TryRead(baseAddresses.Beatmap);
+                string folderName = baseAddresses.Beatmap.FolderName;
+                string fileName = baseAddresses.Beatmap.OsuFileName;
+
+                // status has changed OR player has retried (executes on first run)
+                if (previousStatus != status || previousRetries != retries) {
+                    //Console.WriteLine("aqui "+scrobble);
                     // status updated FROM playing
                     if (previousStatus == (int)OsuMemoryStatus.Playing) {
                         if (scrobble) {
@@ -78,9 +86,6 @@ class Program {
                     }
                     // status updated TO playing
                     if (status == (int)OsuMemoryStatus.Playing) {
-                        // reader.TryRead(baseAddresses.Beatmap);
-                        string folderName = baseAddresses.Beatmap.FolderName;
-                        string fileName = baseAddresses.Beatmap.OsuFileName;
                         // update beatmap metadata
                         beatmapMetadata = BeatmapUtils.ReadMetadata(osuDirectory + "/Songs/" + folderName + "/" + fileName);
                         startTime = DateTime.Now;
@@ -93,17 +98,16 @@ class Program {
                                 ;
                 }
 
-                // map diff changed, it's easier to listen to this instead of constant decoding metadata
-                if (mapString != previousMapString) {
-                    //Console.WriteLine("cambiado");
-
-                    // i thought this was broken, but i guess something just sucks on last.fm's end
-                    // because of that, i decided to make this configgable
-                    if(config.updateNowPlaying) lastfm.Track.UpdateNowPlayingAsync(makeScrobble());
+                // filename changed, it's easier to listen to this instead of constantly decoding metadata from the osz
+                if (fileName != previousFileName) {
+                    //Console.WriteLine($"AQUI {folderName} , {fileName}");
+                    beatmapMetadata = BeatmapUtils.ReadMetadata(osuDirectory + "/Songs/" + folderName + "/" + fileName);
+                    if (config.updateNowPlaying) lastfm.Track.UpdateNowPlayingAsync(makeScrobble());
                 }
 
                 previousStatus = status;
-                previousMapString = mapString;
+                previousFileName = fileName;
+                previousRetries = retries;
             }
             //else Console.WriteLine("osu! process not found");
 
