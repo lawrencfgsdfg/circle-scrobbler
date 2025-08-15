@@ -29,12 +29,12 @@ I decided to write this because although [this scrobbler](https://github.com/iMy
 |artistRegex|Regex pattern to <b>remove</b> from artist names.<br>This is empty by default.|
 |preferUnicodeTitle|Whether or not to prefer unicode over romanised song titles.<br>Default value is `true`.|
 |preferUnicodeArtist|Whether or not to prefer unicode over romanised artist names.<br>Default value is `true`.|
-|updateNowPlaying|Whether or not to update the "now scrobbling" on your profile.<br>In my experience, it's been desynchronized / not working at all, but nothing breaks when leaving it on.<br>Default value is `true`.|
+|updateNowPlaying|Whether or not to update the "now scrobbling" on your profile.<br>When quickly switching in song select, last.fm may get confused and display an older track.<br>Default value is `true`.|
 
 ## Potential Future Plans
 - Allow scrobbling outside of gameplay.
 - Cross check metadata with Spotify or other platforms.
-- Maybe fix the janky "now scrobbling"?
+- Attempt to make "now scrobbling" more accurate.
 
 ## Developer Comments
 
